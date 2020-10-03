@@ -1,0 +1,81 @@
+{
+	"name": "vscode-byebug",
+	"displayName": "vscode-byebug",
+	"description": "VSCode integration for Byebug",
+	"version": "0.0.1",
+	"author": {
+		"name": "Ethan Reesor",
+		"email": "ethan.reesor@gmail.com",
+		"url": "https://gitlab.com/firelizzard"
+	},
+	"engines": {
+		"vscode": "^1.49.0"
+	},
+	"categories": [
+		"Other"
+	],
+	"activationEvents": [
+		"onLanguage:ruby",
+		"onDebug"
+	],
+	"main": "./out/extension.js",
+	"contributes": {
+		"breakpoints": [
+			{
+				"language": "ruby"
+			}
+		],
+		"debuggers": [
+			{
+				"type": "ruby-byebug",
+				"label": "Ruby (Byebug)",
+				"languages": [
+					"ruby"
+				],
+				"configurationAttributes": {
+					"launch": {
+						"required": [
+							"program"
+						],
+						"properties": {
+							"program": {
+								"type": "string",
+								"description": "Absolute path to a Ruby file.",
+								"default": "${workspaceFolder}/${command:AskForProgramName}"
+							}
+						}
+					},
+					"attach": {
+						"required": [
+							"socket"
+						],
+						"properties": {
+							"socket": {
+								"type": "string",
+								"description": "Path to the debug socket"
+							}
+						}
+					}
+				}
+			}
+		]
+	},
+	"scripts": {
+		"vscode:prepublish": "yarn run compile",
+		"compile": "tsc -p ./",
+		"lint": "eslint src --ext ts",
+		"watch": "tsc -watch -p ./"
+	},
+	"devDependencies": {
+		"@types/node": "^12.11.7",
+		"@types/vscode": "^1.49.0",
+		"@typescript-eslint/eslint-plugin": "^4.1.1",
+		"@typescript-eslint/parser": "^4.1.1",
+		"eslint": "^7.9.0",
+		"typescript": "^4.0.2",
+		"vscode-test": "^1.4.0"
+	},
+	"dependencies": {
+		"vscode-debugadapter": "^1.42.1"
+	}
+}
