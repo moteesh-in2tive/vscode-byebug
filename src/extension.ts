@@ -4,15 +4,16 @@ import * as path from 'path';
 import { eventNames } from 'process';
 import * as vscode from 'vscode';
 import {
-	WorkspaceFolder,
-	DebugConfiguration,
-	ProviderResult,
 	CancellationToken,
-	DebugSession,
-	DebugAdapterExecutable,
 	DebugAdapterDescriptor,
-	DebugAdapterNamedPipeServer,
 	DebugAdapterDescriptorFactory,
+	DebugAdapterExecutable,
+	DebugAdapterNamedPipeServer,
+	DebugAdapterTracker,
+	DebugConfiguration,
+	DebugSession,
+	ProviderResult,
+	WorkspaceFolder,
 } from 'vscode';
 
 export function activate(context: vscode.ExtensionContext) {
@@ -31,15 +32,38 @@ export function activate(context: vscode.ExtensionContext) {
 			];
 		}
 	}));
+
+	if (false) {
+		context.subscriptions.push(vscode.debug.registerDebugAdapterTrackerFactory('ruby-byebug', {
+			createDebugAdapterTracker(session: DebugSession): ProviderResult<DebugAdapterTracker> {
+				return {
+					onWillStartSession(): void {
+						console.log(`${session.name} onWillStartSession`);
+					},
+					onWillReceiveMessage(message: any): void {
+						console.log(`${session.name} onWillReceiveMessage =>`, message);
+					},
+					onDidSendMessage(message: any): void {
+						console.log(`${session.name} onDidSendMessage =>`, message);
+					},
+					onWillStopSession(): void {
+						console.log(`${session.name} onWillStopSession`);
+					},
+					onError(error: Error): void {
+						console.log(`${session.name} onError =>`, error);
+					},
+					onExit(code: number | undefined, signal: string | undefined): void {
+						console.log(`${session.name} onExit => code ${code}${signal ? ', signal ' + signal : ''}`);
+					},
+				};
+			}
+		}));
+	}
 }
 
 export function deactivate() {}
 
-class ByebugConfigurationProvider implements vscode.DebugConfigurationProvider {
-	/**
-	 * Massage a debug configuration just before a debug session is being launched,
-	 * e.g. add all missing attributes to the debug configuration.
-	 */
+class ByebugConfigurationProvider implements vscode.DebugConfigurationProvider {\
 	resolveDebugConfiguration(folder: WorkspaceFolder | undefined, config: DebugConfiguration, token?: CancellationToken): ProviderResult<DebugConfiguration> {
 		if (config.program || config.request == 'attach')
 			return config;
@@ -73,7 +97,7 @@ class ByebugAdapterDescriptorFactory implements DebugAdapterDescriptorFactory {
 		}
 
 		return new DebugAdapterExecutable('bundle', [
-			'exec', 'byebug-dap', 'stdio', session.configuration.program
+			'exec', 'byebug-dap', '--stdio', session.configuration.program
 		], {
 			cwd: session.configuration.cwd || path.dirname(session.configuration.program),
 		});
