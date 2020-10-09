@@ -24,6 +24,18 @@ let outputChannel: vscode.OutputChannel;
 export function activate(context: vscode.ExtensionContext) {
 	outputChannel = vscode.window.createOutputChannel('Byebug');
 
+	context.subscriptions.push(vscode.debug.onDidReceiveDebugSessionCustomEvent(e => {
+		switch (e.event) {
+		case 'childSpawned':
+			vscode.debug.startDebugging(e.session.workspaceFolder, {
+				type: 'ruby-byebug',
+				name: e.body!.name,
+				request: 'attach',
+				socket: e.body!.socket,
+			} as AttachConfiguration, e.session);
+		}
+	}));
+
 	context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('ruby-byebug', new ByebugConfigurationProvider()));
 	context.subscriptions.push(vscode.debug.registerDebugAdapterDescriptorFactory('ruby-byebug', new ByebugAdapterDescriptorFactory()));
 
@@ -39,36 +51,6 @@ export function activate(context: vscode.ExtensionContext) {
 			];
 		}
 	}));
-
-	if (false) {
-		context.subscriptions.push(vscode.debug.registerDebugAdapterTrackerFactory('ruby-byebug', {
-			createDebugAdapterTracker(session: DebugSession): ProviderResult<DebugAdapterTracker> {
-				return {
-					onWillStartSession(): void {
-						console.log(`${session.name} onWillStartSession`);
-					},
-					onWillReceiveMessage(message: any): void {
-						console.log(`${session.name} onWillReceiveMessage =>`, message);
-					},
-					onDidSendMessage(message: any): void {
-						console.log(`${session.name} onDidSendMessage =>`, message);
-					},
-					onWillStopSession(): void {
-						console.log(`${session.name} onWillStopSession`);
-					},
-					onError(error: Error): void {
-						console.log(`${session.name} onError =>`, error);
-					},
-					onExit(code: number | undefined, signal: string | undefined): void {
-						console.log(`${session.name} onExit => code ${code}${signal ? ', signal ' + signal : ''}`);
-					},
-					// onOutput(s: string): void {
-					// 	console.log(`${session.name} onOutput =>`, s);
-					// }
-				};
-			}
-		}));
-	}
 }
 
 export function deactivate() {
@@ -101,7 +83,7 @@ class ByebugConfigurationProvider implements vscode.DebugConfigurationProvider {
 }
 
 class ByebugAdapterDescriptorFactory implements DebugAdapterDescriptorFactory {
-	async createDebugAdapterDescriptor(session: DebugSession, executable: DebugAdapterExecutable | undefined): ProviderResult<DebugAdapterDescriptor> {
+	async createDebugAdapterDescriptor(session: DebugSession, executable: DebugAdapterExecutable | undefined): Promise<DebugAdapterDescriptor | null> {
 		if (session.configuration.request == 'attach') {
 			return new DebugAdapterNamedPipeServer(session.configuration.socket);
 		}
@@ -123,9 +105,11 @@ class ByebugAdapterDescriptorFactory implements DebugAdapterDescriptorFactory {
 			program = config.byebugDapPath;
 		}
 
+		const startCode = randomName(10);
+		const startCodeRE = new RegExp(`^${startCode}$`, 'm');
 		const socket = await getTempFilePath(`debug-${randomName(10)}.socket`);
 		// args.push('--wait', '--stdio');
-		args.push('--wait', '--unix', socket);
+		args.push('--wait', '--on-start', startCode, '--unix', socket);
 		args.push(config.program);
 		if (config.args)
 			args.push(...config.args);
@@ -157,7 +141,7 @@ class ByebugAdapterDescriptorFactory implements DebugAdapterDescriptorFactory {
 				});
 			}
 
-			if (!/^Starting DAP$/m.test(output)) {
+			if (!startCodeRE.test(output)) {
 				let lines = output.split('\n');
 				output = lines.splice(-1, 1)[0];
 				lines.forEach(l => outputChannel.appendLine(l));
@@ -245,10 +229,15 @@ class ByebugAdapterDescriptorFactory implements DebugAdapterDescriptorFactory {
 }
 
 interface AttachConfiguration extends DebugConfiguration {
+	type: 'ruby-byebug';
+	request: 'attach';
 	socket: string;
 }
 
 interface LaunchConfiguration extends DebugConfiguration {
+	type: 'ruby-byebug';
+	request: 'attach';
+
 	program: string;
 	cwd?: string;
 	args?: string[];

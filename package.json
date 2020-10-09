@@ -1,7 +1,8 @@
 {
 	"name": "vscode-byebug",
-	"displayName": "vscode-byebug",
-	"description": "VSCode integration for Byebug",
+	"displayName": "VSCode Byebug Debugger",
+	"description": "Byebug debugger support for VSCode",
+	"publisher": "ethan-reesor",
 	"version": "0.1.0",
 	"license": "MIT",
 	"author": {
@@ -9,12 +10,27 @@
 		"email": "ethan.reesor@gmail.com",
 		"url": "https://gitlab.com/firelizzard"
 	},
+	"homepage": "https://gitlab.com/firelizzard/vscode-byebug",
+	"repository": {
+	  "type": "git",
+	  "url": "https://gitlab.com/firelizzard/vscode-byebug.git"
+	},
+	"bugs": {
+	  "url": "https://gitlab.com/firelizzard/vscode-byebug/-/issues"
+	},
+	"categories": [
+	  "Debuggers"
+	],
+	"keywords": [
+	  "debug",
+	  "debugging",
+	  "debugger",
+	  "byebug",
+	  "ruby"
+	],
 	"engines": {
 		"vscode": "^1.49.0"
 	},
-	"categories": [
-		"Other"
-	],
 	"activationEvents": [
 		"onLanguage:ruby",
 		"onDebug"
