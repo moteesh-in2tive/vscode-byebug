@@ -105,11 +105,14 @@ class ByebugAdapterDescriptorFactory implements DebugAdapterDescriptorFactory {
 			program = config.byebugDapPath;
 		}
 
+		if (config.showProtocolLog === true)
+			args.push('--debug-protocol');
+
 		const startCode = randomName(10);
 		const startCodeRE = new RegExp(`^${startCode}$`, 'm');
 		const socket = await getTempFilePath(`debug-${randomName(10)}.socket`);
 		// args.push('--wait', '--stdio');
-		args.push('--wait', '--on-start', startCode, '--unix', socket);
+		args.push('--wait', '--capture-output', '--supress-output', '--on-start', startCode, '--unix', socket);
 		args.push(config.program);
 		if (config.args)
 			args.push(...config.args);
@@ -242,6 +245,8 @@ interface LaunchConfiguration extends DebugConfiguration {
 	cwd?: string;
 	args?: string[];
 	env?: { [key: string]: string };
+
+	showProtocolLog?: boolean;
 
 	useBundler: boolean;
 	rubyPath?: string;

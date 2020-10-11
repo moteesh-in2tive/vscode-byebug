@@ -89,6 +89,11 @@
 								"description": "Additional environment variables to pass to the debugging (and debugged) process.",
 								"default": {}
 							},
+							"showProtocolLog": {
+								"type": "boolean",
+								"description": "Show a log of DAP requests, events, and responses",
+								"default": false
+							},
 							"useBundler": {
 								"type": "boolean",
 								"description": "Execute Ruby programs with `bundle exec` instead of directly",
