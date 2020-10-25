@@ -1,0 +1,27 @@
+stages:
+- publish
+
+variables:
+  VSCE_BASE_CONTENT_URL: ${CI_PROJECT_URL}/-/blob/${CI_COMMIT_SHA}/
+  VSCE_BASE_IMAGE_URL: ${CI_PROJECT_URL}/-/raw/${CI_COMMIT_SHA}/
+
+package:
+  stage: publish
+  tags: [ docker ]
+  image: node
+  script:
+  - npm install --global vsce
+  - vsce package --baseContentURL $VSCE_BASE_CONTENT_URL --baseImagesUrl $VSCE_BASE_IMAGE_URL
+
+publish:open-vsx:
+  stage: publish
+  tags: [ docker ]
+  image: node
+  # rules: { if: '$CI_COMMIT_TAG =~ /^v(\d+)\.(\d+)\.(\d+)/'}
+  environment:
+    name: open-vsx
+    url: https://open-vsx.org/extension/ethan-reesor/vscode-byebug
+  script:
+  - npm install --global vsce json ovsx
+  - json -I -f package.json -e 'this.version = "1.2.3"'
+  - vsce package --baseContentURL $VSCE_BASE_CONTENT_URL --baseImagesUrl $VSCE_BASE_IMAGE_URL

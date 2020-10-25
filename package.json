@@ -3,7 +3,7 @@
 	"displayName": "VSCode Byebug Debugger",
 	"description": "Byebug debugger support for VSCode",
 	"publisher": "ethan-reesor",
-	"version": "0.1.1",
+	"version": "PRERELEASE",
 	"license": "MIT",
 	"author": {
 		"name": "Ethan Reesor",
