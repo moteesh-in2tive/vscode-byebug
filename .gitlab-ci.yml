@@ -4,6 +4,8 @@ stages:
 variables:
   VSCE_BASE_CONTENT_URL: ${CI_PROJECT_URL}/-/blob/${CI_COMMIT_SHA}/
   VSCE_BASE_IMAGE_URL: ${CI_PROJECT_URL}/-/raw/${CI_COMMIT_SHA}/
+  JOB_TOKEN_HEADER: 'Job-Token: ${CI_JOB_TOKEN}'
+  PACKAGE_REGISTRY_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/myawesomerelease/${PACKAGE_VERSION}"
 
 package:
   stage: publish
@@ -23,7 +25,11 @@ publish:open-vsx:
     name: open-vsx
     url: https://open-vsx.org/extension/ethan-reesor/vscode-byebug
   script:
+  - VERSION=0.0.1-blah
   - yarn install --frozen-lockfile
   - yarn global add vsce json ovsx
-  - json -I -f package.json -e 'this.version = "1.2.3"'
+  - json -I -f package.json -e "this.version = '$VERSION'"
+  - NAME=$(node -e "console.log(require('./package.json').name)")
+  - PKG_URL="${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${NAME}/${VERSION}"
   - vsce package --baseContentUrl $VSCE_BASE_CONTENT_URL --baseImagesUrl $VSCE_BASE_IMAGE_URL
+  - curl -H "$JOB_TOKEN_HEADER" --upload-file ${NAME}-${VERSION}.vsix ${PKG_URL}/${NAME}-${VERSION}.vsix
