@@ -18,7 +18,7 @@ async function exists(file: string): Promise<boolean> {
 let tmpDir: string | undefined;
 export async function getTempFilePath(name: string): Promise<string> {
 	if (!tmpDir)
-		tmpDir = await fsp.mkdtemp(os.tmpdir() + path.sep + 'vscode-go-test-adapter');
+		tmpDir = await fsp.mkdtemp(os.tmpdir() + path.sep + 'vscode-byebug');
 
 	if (!await exists(tmpDir))
 		await fsp.mkdir(tmpDir);
