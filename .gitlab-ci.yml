@@ -10,8 +10,8 @@ package:
   tags: [ docker ]
   image: node
   script:
-  - npm ci
-  - npm install --global vsce
+  - yarn install --frozen-lockfile
+  - yarn global add vsce
   - vsce package --baseContentUrl $VSCE_BASE_CONTENT_URL --baseImagesUrl $VSCE_BASE_IMAGE_URL
 
 publish:open-vsx:
@@ -23,7 +23,7 @@ publish:open-vsx:
     name: open-vsx
     url: https://open-vsx.org/extension/ethan-reesor/vscode-byebug
   script:
-  - npm ci
-  - npm install --global vsce json ovsx
+  - yarn install --frozen-lockfile
+  - yarn global add vsce json ovsx
   - json -I -f package.json -e 'this.version = "1.2.3"'
   - vsce package --baseContentUrl $VSCE_BASE_CONTENT_URL --baseImagesUrl $VSCE_BASE_IMAGE_URL
