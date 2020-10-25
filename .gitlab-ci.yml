@@ -11,7 +11,7 @@ package:
   image: node
   script:
   - npm install --global vsce
-  - vsce package --baseContentURL $VSCE_BASE_CONTENT_URL --baseImagesUrl $VSCE_BASE_IMAGE_URL
+  - vsce package --baseContentUrl $VSCE_BASE_CONTENT_URL --baseImagesUrl $VSCE_BASE_IMAGE_URL
 
 publish:open-vsx:
   stage: publish
@@ -24,4 +24,4 @@ publish:open-vsx:
   script:
   - npm install --global vsce json ovsx
   - json -I -f package.json -e 'this.version = "1.2.3"'
-  - vsce package --baseContentURL $VSCE_BASE_CONTENT_URL --baseImagesUrl $VSCE_BASE_IMAGE_URL
+  - vsce package --baseContentUrl $VSCE_BASE_CONTENT_URL --baseImagesUrl $VSCE_BASE_IMAGE_URL
