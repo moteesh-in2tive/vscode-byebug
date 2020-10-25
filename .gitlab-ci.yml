@@ -24,6 +24,8 @@ publish:open-vsx:
   environment:
     name: open-vsx
     url: https://open-vsx.org/extension/ethan-reesor/vscode-byebug
+  release:
+    tag_name: $CI_COMMIT_TAG
   script:
   - VERSION=$(node -e "console.log('$CI_COMMIT_TAG'.slice(1))")
   - yarn install --frozen-lockfile
