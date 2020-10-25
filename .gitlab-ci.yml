@@ -63,10 +63,9 @@ publish:open-vsx:
     name: open-vsx
     url: https://open-vsx.org/extension/ethan-reesor/vscode-byebug
   script:
-  - yarn global add ovsx json
-  - VSIX=$(node -e 'console.log(`${require("./package.json").name}-${"'$CI_COMMIT_TAG'".slice(1)}.vsix`)')
+  - yarn global add ovsx vsce json
   - json -I -f package.json -e "this.version = '$CI_COMMIT_TAG'.slice(1)"
-  - ovsx publish --packagePath ${VSIX}
+  - ovsx publish --baseContentUrl $VSCE_BASE_CONTENT_URL --baseImagesUrl $VSCE_BASE_IMAGE_URL
 
 publish:visual-studio:
   stage: publish
@@ -76,6 +75,5 @@ publish:visual-studio:
     url: https://marketplace.visualstudio.com/items?itemName=ethan-reesor.vscode-byebug
   script:
   - yarn global add vsce json
-  - VSIX=$(node -e 'console.log(`${require("./package.json").name}-${"'$CI_COMMIT_TAG'".slice(1)}.vsix`)')
   - json -I -f package.json -e "this.version = '$CI_COMMIT_TAG'.slice(1)"
-  - vsce publish --packagePath ${VSIX}
+  - vsce publish -p $AZURE_PAT --baseContentUrl $VSCE_BASE_CONTENT_URL --baseImagesUrl $VSCE_BASE_IMAGE_URL
