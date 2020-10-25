@@ -113,7 +113,7 @@ class ByebugAdapterDescriptorFactory implements DebugAdapterDescriptorFactory {
 		const socket = await getTempFilePath(`debug-${randomName(10)}.socket`);
 		// args.push('--wait', '--stdio');
 		args.push('--wait', '--capture-output', '--supress-output', '--on-start', startCode, '--unix', socket);
-		args.push(config.program);
+		args.push('--', config.program);
 		if (config.args)
 			args.push(...config.args);
 
