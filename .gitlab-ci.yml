@@ -25,7 +25,7 @@ publish:open-vsx:
     name: open-vsx
     url: https://open-vsx.org/extension/ethan-reesor/vscode-byebug
   script:
-  - VERSION=0.0.1-blah
+  - VERSION=0.0.1
   - yarn install --frozen-lockfile
   - yarn global add vsce json ovsx
   - json -I -f package.json -e "this.version = '$VERSION'"
