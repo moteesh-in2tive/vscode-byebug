@@ -1,4 +1,5 @@
 stages:
+- package
 - publish
 
 default:
@@ -12,11 +13,29 @@ variables:
   PACKAGE_REGISTRY_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/myawesomerelease/${PACKAGE_VERSION}"
 
 package:
-  stage: publish
+  stage: package
+  artifacts:
+    expire_in: 1 week
+    paths:
+    - '*.vsix'
   script:
   - yarn install --frozen-lockfile
   - yarn global add vsce
+  - if [ "$CI_COMMIT_TAG" =~ /^v(\d+)\.(\d+)\.(\d+)/ ]; then json -I -f package.json -e "this.version = '$CI_COMMIT_TAG'.slice(1)"; fi
   - vsce package --baseContentUrl $VSCE_BASE_CONTENT_URL --baseImagesUrl $VSCE_BASE_IMAGE_URL
+
+publish:gitlab:
+  stage: publish
+  rules: [{ if: '$CI_COMMIT_TAG =~ /^v(\d+)\.(\d+)\.(\d+)/'}]
+  release:
+    tag_name: $CI_COMMIT_TAG
+    description: Release $CI_COMMIT_TAG
+  script:
+  - NAME=$(node -e "console.log(require('./package.json').name)")
+  - VERSION=$(node -e "console.log('$CI_COMMIT_TAG'.slice(1))")
+  - PKG_URL="${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${NAME}/${VERSION}"
+  - VSIX="${NAME}-${VERSION}.vsix"
+  - curl -H "$JOB_TOKEN_HEADER" --upload-file ${VSIX} ${PKG_URL}/${VSIX}
 
 publish:open-vsx:
   stage: publish
@@ -24,17 +43,18 @@ publish:open-vsx:
   environment:
     name: open-vsx
     url: https://open-vsx.org/extension/ethan-reesor/vscode-byebug
-  release:
-    tag_name: $CI_COMMIT_TAG
-    description: Release $CI_COMMIT_TAG
   script:
-  - VERSION=$(node -e "console.log('$CI_COMMIT_TAG'.slice(1))")
-  - yarn install --frozen-lockfile
-  - yarn global add vsce json ovsx
-  - json -I -f package.json -e "this.version = '$VERSION'"
-  - NAME=$(node -e "console.log(require('./package.json').name)")
-  - PKG_URL="${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${NAME}/${VERSION}"
-  - VSIX="${NAME}-${VERSION}.vsix"
-  - vsce package --baseContentUrl $VSCE_BASE_CONTENT_URL --baseImagesUrl $VSCE_BASE_IMAGE_URL
-  - curl -H "$JOB_TOKEN_HEADER" --upload-file ${VSIX} ${PKG_URL}/${VSIX}
+  - yarn global add ovsx
+  - VSIX=$(node -e 'console.log(`${require("./package.json").name}-${"'$CI_COMMIT_TAG'".slice(1)}.vsix`)')
   - ovsx publish --packagePath ${VSIX}
+
+publish:visual-studio:
+  stage: publish
+  rules: [{ if: '$CI_COMMIT_TAG =~ /^v(\d+)\.(\d+)\.(\d+)/'}]
+  environment:
+    name: visual-studio
+    url: https://marketplace.visualstudio.com/items?itemName=ethan-reesor.vscode-byebug
+  script:
+  - yarn global add vsce
+  - VSIX=$(node -e 'console.log(`${require("./package.json").name}-${"'$CI_COMMIT_TAG'".slice(1)}.vsix`)')
+  - vsce publish --packagePath ${VSIX}
