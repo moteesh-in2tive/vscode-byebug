@@ -20,7 +20,7 @@ package:
     - '*.vsix'
   script:
   - yarn install --frozen-lockfile
-  - yarn vsce package $VSCE_FLAGS
+  - npx vsce package $VSCE_FLAGS
 
 package:release:
   stage: package
@@ -31,8 +31,8 @@ package:release:
     - '*.vsix'
   script:
   - yarn install --frozen-lockfile
-  - yarn json -I -f package.json -e "this.version = '$CI_COMMIT_TAG'.slice(1)"
-  - yarn vsce package $VSCE_FLAGS
+  - npx json -I -f package.json -e "this.version = '$CI_COMMIT_TAG'.slice(1)"
+  - npx vsce package $VSCE_FLAGS
 
 publish:gitlab-release:
   stage: publish
@@ -60,8 +60,8 @@ publish:open-vsx:
     name: open-vsx
     url: https://open-vsx.org/extension/ethan-reesor/vscode-byebug
   script:
-  - yarn json -I -f package.json -e "this.version = '$CI_COMMIT_TAG'.slice(1)"
-  - yarn ovsx publish -p $OVSX_PAT --packagePath *.vsix $VSCE_FLAGS
+  - npx json -I -f package.json -e "this.version = '$CI_COMMIT_TAG'.slice(1)"
+  - npx ovsx publish -p $OVSX_PAT --packagePath *.vsix $VSCE_FLAGS
 
 publish:visual-studio:
   stage: publish
@@ -70,5 +70,5 @@ publish:visual-studio:
     name: visual-studio
     url: https://marketplace.visualstudio.com/items?itemName=ethan-reesor.vscode-byebug
   script:
-  - yarn json -I -f package.json -e "this.version = '$CI_COMMIT_TAG'.slice(1)"
-  - yarn vsce publish -p $AZURE_PAT --packagePath *.vsix $VSCE_FLAGS
+  - npx json -I -f package.json -e "this.version = '$CI_COMMIT_TAG'.slice(1)"
+  - npx vsce publish -p $AZURE_PAT --packagePath *.vsix $VSCE_FLAGS
